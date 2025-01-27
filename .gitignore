@@ -1,0 +1,55 @@
+# Arquivos/Diretórios de ambiente virtual
+venv/
+env/
+.venv/
+.env/
+
+# Arquivos de configuração de ambiente
+*.env
+*.env.*
+
+# Arquivos de compilação Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs e arquivos temporários
+*.log
+*.out
+*.err
+*.pid
+*.swp
+*.swo
+*.bak
+
+# Configurações específicas do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Configurações de IDEs/editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ferramentas e pacotes Python
+dist/
+build/
+*.egg-info/
+
+# Arquivos de depuração
+coverage/
+*.coverage
+nosetests.xml
+*.cover
+*.pyre/
+.mypy_cache/
+.pytest_cache/
+
+# Arquivos de banco de dados locais
+*.sqlite3
+*.db
+
+# Ferramentas de lint e formatação
+.cache/
+*.pylint
