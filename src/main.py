@@ -3,7 +3,7 @@ import json
 import os 
 from dotenv import load_dotenv
 from functools import wraps
-
+#TODO: add arquivo de dependencias do projeto e mais refatoração ajuste do codigo
 
 load_dotenv()
 
@@ -21,15 +21,15 @@ def manage_request(function):
             #check error status code (400 a 599) and throws an exception.
             response.raise_for_status()
             response = response.json()
-            print("Requisição bem-sucedida.")
+            print("Request successful.")
             return response
 
         except requests.exceptions.RequestException as err:
-            print(f"Erro durante requisição:\n{err}")
+            print(f"Error during request:\n{err}")
             return None
 
         except json.JSONDecodeError as err:
-            print(f"Erro ao decodificar JSON.\n{err}")
+            print(f"Error decoding JSON.\n{err}")
             return None
 
     return wrapper
@@ -52,7 +52,10 @@ class Trello():
         self.query = {
             "key": f"{API_KEY}",
             "token": f"{API_TOKEN}"
-        } 
+        }
+        self.headers = {
+            "Accept": "application/json"
+        }
 
     @staticmethod
     def save_json(data: dict, path: str):
@@ -69,7 +72,7 @@ class Trello():
         except IOError as err:
             print(f"Error saving file:\n{err}")
 
-
+    
     @manage_request
     def _make_request(self, request_function):
         """
@@ -87,7 +90,10 @@ class Trello():
 
         :return: dict -  request json response.
         """
-        return self._make_request(lambda: requests.get(url=f"{self.BASE_URL}1/members/me/boards?fields=name&{self.KEY_TOKEN_URL}"))
+        return self._make_request(lambda: requests.get(
+            url=f"{self.BASE_URL}1/members/me/boards?fields=name", 
+            params=self.query, 
+            headers=self.headers))
 
 
     def get_board(self, id_board: str) -> (dict | None):
@@ -98,11 +104,25 @@ class Trello():
 
         :return: dict - request json response.
         """
-        return self._make_request(lambda: requests.get(url=f"{self.BASE_URL}1/boards/{id_board}?{self.KEY_TOKEN_URL}"))
-            
+        return self._make_request(lambda: requests.get(
+            url=f"{self.BASE_URL}1/boards/{id_board}", 
+            params=self.query, 
+            headers=self.headers))
 
-    def get_card():
-        ...
+
+    def get_cards_on_board(self, id_board: str) -> (dict | None):
+        """
+        Get all of the open cards on a board.
+
+        :param id_board: ID of the board.
+
+        :return: dict - request json response.
+        """
+        return self._make_request(lambda: requests.get(
+            url=f"{self.BASE_URL}1/boards/{id_board}/cards",
+            params=self.query,
+            headers=self.headers
+        ))
 
 
 def main():
@@ -114,13 +134,20 @@ def main():
 
         for item in all_my_boards:
             board = my_trello.get_board(item["id"])
+            cards = my_trello.get_cards_on_board(item["id"])
+
             if board:
                 my_trello.save_json(data=board, path=f"../json/board_{item['id']}.json")
             else:
-                print("Requisição get_board falhou.")
+                print("get_board request failed.")
+
+            if cards:
+                my_trello.save_json(data=cards, path=f"../json/cards_{item['id']}.json")
+            else:
+                print("get_cards_on_board request failed.")
 
     else:
-        print("Requisição get_all_my_boards falhou.")
+        print("get_all_my_boards request failed.")
 
 
 if __name__ == "__main__":
